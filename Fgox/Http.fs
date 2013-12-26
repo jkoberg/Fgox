@@ -2,20 +2,27 @@
 
 open System.Net.Http
 
-let formEncode kvs = 
-  [for k,v in kvs -> sprintf "%s=%s" k (System.Net.WebUtility.UrlEncode v)] |> String.concat "&"
+type MtGoxAuthHandler(secrets: Fgox.Config.Secrets, innerHandler) = 
+  inherit DelegatingHandler(innerHandler)
+  let productHeader =
+    let assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName()
+    Headers.ProductInfoHeaderValue(assemblyName.Name, assemblyName.Version.ToString())
 
-let assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName()
-let productHeader = Headers.ProductInfoHeaderValue(assemblyName.Name, assemblyName.Version.ToString())
+  member this.MySendAsync(req, token) = base.SendAsync(req, token) |> Async.AwaitTask
 
-let addNonce ps = ("nonce", Fgox.Auth.getTonce().ToString()) :: ps
+  override this.SendAsync(req, token) = Async.StartAsTask <| async {
+      let! body = req.Content.ReadAsStringAsync() |> Async.AwaitTask
+      let body = body + "&nonce=" + Fgox.Auth.getTonce().ToString()
+      req.Headers.Add("Rest-Key", secrets.apikey)
+      req.Headers.Add("Rest-Sign", Fgox.Auth.sign secrets body)
+      req.Headers.UserAgent.Add(productHeader)
+      req.Content <- new StringContent(body, System.Text.Encoding.UTF8, "application/x-www-form-urlencoded")
+      let! response = this.MySendAsync(req, token)
+      return response
+    }
 
-let makePost (secrets:Fgox.Config.Secrets) (pathsuffix:string) payload =
-  let body = payload |> addNonce |> formEncode
-  let req = new HttpRequestMessage(HttpMethod.Post, System.Uri(secrets.uri, pathsuffix))
-  req.Headers.Add("Rest-Key", secrets.apikey)
-  req.Headers.Add("Rest-Sign", Fgox.Auth.sign secrets body)
-  req.Headers.UserAgent.Add(productHeader)
-  req.Content <- new StringContent(body, System.Text.Encoding.UTF8, "application/x-www-form-urlencoded")
-  req
 
+type HttpClient with 
+  static member fromGoxSecrets s =
+    let this = new MtGoxAuthHandler(s, new HttpClientHandler())
+    new HttpClient(this)
