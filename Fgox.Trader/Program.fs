@@ -13,6 +13,8 @@ let main argv =
     let! secrets = Secrets.fromFile "../../fgox_secrets.json"
     use api = new Fgox.Api(secrets)
     do! Fgox.Trader.execTrades api
+    printfn "Press any key"
+    System.Console.ReadKey()
     return 0
   }
     

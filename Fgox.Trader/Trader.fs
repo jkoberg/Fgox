@@ -3,6 +3,6 @@
 open Fgox
 
 let execTrades (gox:Fgox.Api) = async {
-  let! ticket = gox.sell 1.0M 800.0M
+  let! ticket = gox.getOrders()
   printfn "Sell entered: %A" ticket
   }
