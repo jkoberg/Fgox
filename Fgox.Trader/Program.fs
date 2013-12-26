@@ -8,13 +8,12 @@ module Synchronous =
 
 [<EntryPoint>]
 let main argv =
-  printfn "%s" (System.IO.Directory.GetCurrentDirectory())
   Synchronous.ofAsync <| async {
     let! secrets = Secrets.fromFile "../../fgox_secrets.json"
-    use api = new Fgox.Api(secrets)
-    do! Fgox.Trader.execTrades api
+    use gox = new Fgox.Api(secrets)
+    do! Fgox.Trader.Run gox
     printfn "Press any key"
-    System.Console.ReadKey()
+    ignore <| System.Console.ReadKey()
     return 0
   }
     

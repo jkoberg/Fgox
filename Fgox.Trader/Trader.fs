@@ -2,7 +2,7 @@
 
 open Fgox
 
-let execTrades (gox:Fgox.Api) = async {
-  let! ticket = gox.getOrders()
-  printfn "Sell entered: %A" ticket
+let Run (gox:Fgox.Api) = async {
+  let! result = gox.getOrders()
+  printfn "Orders on your account:\n%A" result
   }
