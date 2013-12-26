@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config.fs" />
+    <Compile Include="Types.fs" />
     <Compile Include="Auth.fs" />
     <Compile Include="Http.fs" />
     <Compile Include="Api.fs" />
