@@ -1,21 +1,15 @@
 ﻿module Fgox.Main
 
+open Nito.AsyncEx.Synchronous
 open Fgox.Config
-
-module Synchronous =
-  open Nito.AsyncEx.Synchronous
-  let ofAsync a = (Async.StartAsTask a).WaitAndUnwrapException()
 
 [<EntryPoint>]
 let main argv =
-  Synchronous.ofAsync <| async {
+  (Async.StartAsTask <| async {
     let! secrets = Secrets.fromFile "../../fgox_secrets.json"
-    use gox = new Fgox.Api(secrets)
-    do! Fgox.Trader.Run gox
-    printfn "Press any key"
-    ignore <| System.Console.ReadKey()
+    do! new Fgox.Api(secrets) |> Fgox.Trader.Run
     return 0
-  }
+  }).WaitAndUnwrapException()
     
 
   

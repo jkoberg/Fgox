@@ -10,6 +10,8 @@ open Fgox.Http
 
 
 type Api(secrets:Secrets) =
+  let priceFactor = 100000M
+  let qtyFactor = 100000000M
   let client = HttpClient.fromGoxSecrets secrets
   let formEncode kvs =
     String.concat "&" <| [for k,v in kvs -> sprintf "%s=%s" k (System.Net.WebUtility.UrlEncode v)] 
@@ -30,19 +32,18 @@ type Api(secrets:Secrets) =
       client.Dispose()
 
   member this.sell (qty:decimal) (price:decimal) = async {
-    let! _, json =
+    let! resp, json =
       send "api/1/generic/private/order/add" [
         "type", "ask" 
-        "amount_int", (qty * 100000000M |> round).ToString()
-        "price_int", (price * 100000M |> round).ToString()
+        "amount_int", (qty * qtyFactor |> round).ToString()
+        "price_int", (price * priceFactor |> round).ToString()
         ]
     return json
     }
 
   member this.getOrders() = async {
-    let! _, json = send "api/1/generic/private/orders" []
-    if json?result.AsString() = "success" then
-      return  json?``return``.AsArray()
-    else
-      return [||]
+    let! resp, json = send "api/1/generic/private/orders" []
+    return if json?result.AsString() = "success"
+           then json?``return``.AsArray()
+           else Array.empty
     }
