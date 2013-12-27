@@ -66,7 +66,8 @@
     <Compile Include="Config.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="Auth.fs" />
-    <Compile Include="Http.fs" />
+    <Compile Include="Http.AuthHandler.fs" />
+    <Compile Include="Http.Client.fs" />
     <Compile Include="Api.fs" />
     <None Include="packages.config" />
   </ItemGroup>
