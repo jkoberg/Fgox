@@ -61,6 +61,10 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.Xml" />
+    <Reference Include="WebSocket4Net">
+      <HintPath>..\packages\WebSocket4Net.0.8\lib\net40\WebSocket4Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config.fs" />
@@ -69,6 +73,7 @@
     <Compile Include="Http.AuthHandler.fs" />
     <Compile Include="Http.Client.fs" />
     <Compile Include="Api.fs" />
+    <Compile Include="Realtime.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup>
